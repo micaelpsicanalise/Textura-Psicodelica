@@ -1,0 +1,222 @@
+:root{
+  --bg-0:#141417;
+  --bg-1:#1b1b20;
+  --bg-2:#232329;
+  --line:#323238;
+  --text-0:#eceef0;
+  --text-1:#9a9aa2;
+  --accent:#ff3d81;
+  --accent-dim:#7a2745;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  height:100%;
+  background:var(--bg-0);
+  color:var(--text-0);
+  font-family:var(--sans);
+  font-size:14px;
+}
+
+.app{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:0 16px;
+  height:52px;
+  background:var(--bg-1);
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+
+.brand{
+  font-family:var(--mono);
+  letter-spacing:0.04em;
+  font-size:13px;
+  color:var(--text-1);
+}
+
+.tile-size-control{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-left:24px;
+  color:var(--text-1);
+}
+.tile-size-control select{
+  background:var(--bg-2);
+  color:var(--text-0);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:4px 6px;
+}
+
+.spacer{flex:1;}
+
+.btn{
+  border:1px solid var(--line);
+  background:var(--bg-2);
+  color:var(--text-0);
+  padding:7px 14px;
+  border-radius:6px;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn:hover{border-color:#4a4a54;}
+.btn.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#1a0510;
+  font-weight:600;
+}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.ghost{background:transparent;}
+
+.workspace{
+  flex:1;
+  display:flex;
+  min-height:0;
+}
+
+.tools{
+  width:76px;
+  flex-shrink:0;
+  background:var(--bg-1);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding:10px 8px;
+  gap:6px;
+}
+
+.tool-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:10px 4px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--text-1);
+  border-radius:8px;
+  cursor:pointer;
+}
+.tool-btn svg{
+  width:20px;
+  height:20px;
+  stroke:currentColor;
+  fill:none;
+}
+.tool-btn span{font-size:10.5px;}
+.tool-btn:hover{background:var(--bg-2);color:var(--text-0);}
+.tool-btn.active{
+  background:var(--accent-dim);
+  color:#ffcfe0;
+  border-color:var(--accent);
+}
+
+.editor{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  min-width:0;
+  gap:10px;
+}
+
+.canvas-wrap{
+  background:
+    linear-gradient(45deg,#26262c 25%,transparent 25%),
+    linear-gradient(-45deg,#26262c 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#26262c 75%),
+    linear-gradient(-45deg,transparent 75%,#26262c 75%);
+  background-size:16px 16px;
+  background-position:0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color:#1e1e23;
+  border:1px solid var(--line);
+  border-radius:4px;
+  line-height:0;
+}
+
+#editCanvas{
+  display:block;
+  cursor:crosshair;
+}
+
+.hint{
+  color:var(--text-1);
+  font-size:12px;
+  max-width:560px;
+  text-align:center;
+  margin:0;
+}
+
+.style-panel{
+  width:260px;
+  flex-shrink:0;
+  background:var(--bg-1);
+  border-left:1px solid var(--line);
+  padding:16px;
+  overflow-y:auto;
+}
+
+.style-panel h3{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--text-1);
+  margin:0 0 12px;
+  font-weight:600;
+}
+
+.style-panel hr{
+  border:none;
+  border-top:1px solid var(--line);
+  margin:18px 0;
+}
+
+.field{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  color:var(--text-1);
+}
+.field span{width:78px;flex-shrink:0;font-size:12.5px;}
+.field input[type="range"]{flex:1;}
+.field input[type="color"]{
+  width:36px;height:26px;padding:0;border:1px solid var(--line);border-radius:4px;background:none;
+}
+.field output{width:34px;font-size:12px;text-align:right;color:var(--text-0);}
+
+.preview-wrap{
+  border:1px solid var(--line);
+  border-radius:4px;
+  overflow:hidden;
+  line-height:0;
+}
+
+#previewCanvas{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+.roadmap-note{
+  color:var(--text-1);
+  font-size:11.5px;
+  line-height:1.5;
+}
