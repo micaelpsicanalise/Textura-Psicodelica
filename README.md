@@ -55,50 +55,64 @@ js/engine/tools.js       — Pen, Freehand, Ellipse, Rect (onDown/onMove/onUp)
 js/engine/export.js      — export PNG
 ```
 
-## O que já tem (v0.1)
+## O que já tem (v0.2)
 
 - Pena Bézier (clique = âncora reta, clique+arrasta = handle suave,
   clique perto do primeiro ponto fecha o path, Enter finaliza, Esc cancela)
-- Mão livre
-- Elipse e retângulo
+- Mão livre, elipse, retângulo
 - Wrap seamless completo (o difícil)
 - Preview 3x3 do padrão repetido, sincronizado em tempo real
-- Estilo básico: cor, espessura, opacidade (traço único, sem por-path ainda)
-- Undo (histórico de snapshots)
-- Export PNG no tamanho do tile (256/512/1024)
+- Undo (histórico de snapshots), export PNG (256/512/1024)
+- **Efeitos** (`js/engine/render.js` + `js/engine/geometry.js`):
+  - **Gradiente** — linear, 2 paradas de cor, direção = do primeiro ao
+    último ponto amostrado da forma (`Geometry.flatten`).
+  - **Taper** (afinamento nas pontas) — Canvas não tem stroke de largura
+    variável nativo, então a centerline é convertida num polígono
+    preenchido (`Geometry.taperedPolygon`), com largura interpolada por
+    **fração do comprimento de arco** (não por índice de ponto, pra ficar
+    proporcional visualmente mesmo em curvas com pontos desiguais).
+  - **Glow** — `ctx.shadowBlur` + `ctx.shadowColor`.
+  - **Dash animado** — `ctx.setLineDash` + `lineDashOffset` animado por
+    tempo real (`requestAnimationFrame`), velocidade em px/s (negativa
+    inverte o sentido).
+  - **Pulso de opacidade** — oscilação senoidal em função do tempo,
+    velocidade em ciclos/s.
+
+Os efeitos são hoje **globais** (aplicam ao próximo traço desenhado, não
+retroativos aos já existentes) — cada path guarda seu próprio snapshot de
+estilo (`AppState.cloneStyle()`, cópia profunda), então tecnicamente já
+está pronto pra virar "por objeto" assim que existir uma ferramenta de
+seleção. Export PNG congela em t=0 (determinístico); export animado é
+item de roadmap (sequência PNG / WebM).
 
 ## Roadmap (próximos commits, em ordem de dependência)
 
-1. **Estilo por path + camadas** — hoje o estilo é global; precisa virar
-   por-objeto, e depois agrupar em camadas com reordenação/visibilidade.
-2. **Gradiente multi-stop (até 16 cores)** — `CanvasGradient` já suporta
-   N stops nativamente, o trabalho é a UI de editar as paradas de cor.
-3. **Taper (afinamento nas pontas)** — Canvas não tem `stroke-width`
-   variável nativo. Precisa converter a centerline em um polígono
-   preenchido com largura calculada ponto a ponto (largura interpolada
-   entre `widthStart` e `widthEnd` ao longo do comprimento do path).
-4. **Glow** — `ctx.shadowBlur` + `ctx.shadowColor` resolve o caso simples;
-   glow mais forte pode precisar de um blur em canvas offscreen composto
-   por cima.
-5. **Dash animado / stroke viajando pela forma** — parametrizar tudo em
-   função de `t` (0 a 1, módulo duração do loop) e usar
-   `ctx.lineDashOffset` animado por `requestAnimationFrame`. Pulso de
-   opacidade e shift de cor são a mesma ideia (interpolação por fase).
-6. **Export de sequência PNG + WebM** — sequência é só rodar o render
-   frame a frame fora de tempo real e empacotar com JSZip; WebM é
-   `canvas.captureStream()` + `MediaRecorder` (tem a mesma limitação de
-   fundo opaco do original, a menos que se troque por ffmpeg.wasm).
-7. **Tracing de imagem raster → path editável** — algoritmo tipo potrace
+1. **Ferramenta de seleção + estilo por path** — clicar num traço
+   existente e reabrir seu estilo no painel (hoje só dá pra definir o
+   estilo do *próximo* traço).
+2. **Gradiente com N paradas (até 16)** — o motor já suporta (`CanvasGradient`
+   aceita quantos stops quiser), falta só a UI de lista dinâmica em vez
+   de 2 cores fixas.
+3. **Camadas** — agrupar paths, reordenar, visibilidade.
+4. **Export de sequência PNG + WebM** — sequência é rodar o render frame
+   a frame fora de tempo real e empacotar com JSZip; WebM é
+   `canvas.captureStream()` + `MediaRecorder` (mesma limitação de fundo
+   opaco do original, a menos que se troque por ffmpeg.wasm).
+5. **Tracing de imagem raster → path editável** — algoritmo tipo potrace
    (diferente do Canny que a gente usou no preview de tatuagem — ali era
    detecção de borda, aqui precisa ser fill de região + contorno
-   fechado). Dá pra usar uma lib pronta (ex: `potrace` ou
-   `ImageTracer.js`) em vez de reescrever do zero.
-8. **Salvar/carregar projeto (`.tsproj` equivalente)** — serializar
-   `AppState.paths` + config em JSON. Trivial uma vez que o modelo de
-   dados já é serializável (já é, hoje).
-9. **Empacotamento desktop** — Electron por cima do mesmo HTML/JS/CSS,
-   pra virar "app instalável" sem navegador, com salvar/abrir arquivo
-   local nativo.
+   fechado). Dá pra usar lib pronta (`potrace` / `ImageTracer.js`).
+6. **Salvar/carregar projeto (`.tsproj` equivalente)** — serializar
+   `AppState.paths` + config em JSON. Trivial, o modelo já é
+   serializável hoje.
+7. **Empacotamento desktop** — Electron por cima do mesmo HTML/JS/CSS.
+
+## Limitação conhecida do taper
+
+`Geometry.taperedPolygon` usa a técnica simples de offset perpendicular
+por normal local — funciona bem na maioria dos casos, mas pode
+autointersectar em curvas muito fechadas com largura grande (artefato
+visual, não erro). Se aparecer, é o próximo ajuste fino a fazer.
 
 ## Supabase (quando entrar)
 

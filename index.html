@@ -55,14 +55,23 @@
     </main>
 
     <section class="style-panel">
-      <h3>Estilo do traço</h3>
+      <h3>Cor</h3>
 
-      <label class="field">
+      <label class="field" id="soloColorField">
         <span>Cor</span>
         <input type="color" id="strokeColor" value="#ff3d81">
       </label>
 
-      <label class="field">
+      <label class="field-toggle">
+        <input type="checkbox" id="gradientToggle">
+        <span>Usar gradiente (2 cores)</span>
+      </label>
+      <div class="sub-fields" id="gradientFields" style="display:none;">
+        <label class="field"><span>Início</span><input type="color" id="gradientStop0" value="#ff3d81"></label>
+        <label class="field"><span>Fim</span><input type="color" id="gradientStop1" value="#3d6bff"></label>
+      </div>
+
+      <label class="field" id="widthField">
         <span>Espessura</span>
         <input type="range" id="strokeWidth" min="1" max="60" value="8">
         <output id="strokeWidthOut">8</output>
@@ -76,6 +85,45 @@
 
       <hr>
 
+      <h3>Efeitos</h3>
+
+      <label class="field-toggle">
+        <input type="checkbox" id="taperToggle">
+        <span>Afinar pontas (taper)</span>
+      </label>
+      <div class="sub-fields" id="taperFields" style="display:none;">
+        <label class="field"><span>Início</span><input type="range" id="taperStart" min="0" max="60" value="2"></label>
+        <label class="field"><span>Fim</span><input type="range" id="taperEnd" min="0" max="60" value="28"></label>
+      </div>
+
+      <label class="field-toggle">
+        <input type="checkbox" id="glowToggle">
+        <span>Brilho (glow)</span>
+      </label>
+      <div class="sub-fields" id="glowFields" style="display:none;">
+        <label class="field"><span>Intensidade</span><input type="range" id="glowBlur" min="0" max="60" value="20"></label>
+      </div>
+
+      <label class="field-toggle">
+        <input type="checkbox" id="dashToggle">
+        <span>Traço animado (dash)</span>
+      </label>
+      <div class="sub-fields" id="dashFields" style="display:none;">
+        <label class="field"><span>Traço</span><input type="range" id="dashLen" min="2" max="80" value="18"></label>
+        <label class="field"><span>Vão</span><input type="range" id="dashGap" min="2" max="80" value="14"></label>
+        <label class="field"><span>Velocidade</span><input type="range" id="dashSpeed" min="-200" max="200" value="60"></label>
+      </div>
+
+      <label class="field-toggle">
+        <input type="checkbox" id="pulseToggle">
+        <span>Pulsar opacidade</span>
+      </label>
+      <div class="sub-fields" id="pulseFields" style="display:none;">
+        <label class="field"><span>Velocidade</span><input type="range" id="pulseSpeed" min="1" max="30" value="6"></label>
+      </div>
+
+      <hr>
+
       <h3>Preview (padrão repetido)</h3>
       <div class="preview-wrap">
         <canvas id="previewCanvas"></canvas>
@@ -83,8 +131,8 @@
 
       <hr>
 
-      <h3>Camadas (roadmap)</h3>
-      <p class="roadmap-note">v0.1: traço único global. Próximo: múltiplas camadas, gradiente multi-stop, glow, taper e dash animado — ver README.</p>
+      <h3>Roadmap</h3>
+      <p class="roadmap-note">Efeitos hoje são globais (aplicam ao próximo traço desenhado). Próximo: seleção de path + estilo independente por camada, gradiente com N paradas, e export de sequência PNG/WebM já animado — ver README.</p>
     </section>
 
   </div>

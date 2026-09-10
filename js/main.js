@@ -32,9 +32,28 @@
     return {x, y};
   }
 
+  const clockStart = performance.now();
+
+  function render(timeSec){
+    Renderer.renderEditView(editCanvas, AppState.paths, AppState.tileSize, AppState.draft, MARGIN, timeSec);
+    Renderer.renderPreview(previewCanvas, AppState.paths, AppState.tileSize, AppState.draft, 3, timeSec);
+  }
+
+  // loop continuo: necessario pros efeitos animados (dash a fluir, pulso
+  // de opacidade). Um redraw parado no tempo so funcionava enquanto
+  // nenhum path tinha animacao -- agora sempre roda, o custo e baixo pro
+  // tamanho de canvas que estamos desenhando.
+  function loop(now){
+    render((now - clockStart) / 1000);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // mantido por compatibilidade com o resto do arquivo: so forca um
+  // redraw imediato fora do proximo frame do loop (input sente mais
+  // responsivo que esperar o rAF).
   function requestRender(){
-    Renderer.renderEditView(editCanvas, AppState.paths, AppState.tileSize, AppState.draft, MARGIN);
-    Renderer.renderPreview(previewCanvas, AppState.paths, AppState.tileSize, AppState.draft, 3);
+    render((performance.now() - clockStart) / 1000);
   }
 
   // ---- input do canvas de edicao ----
@@ -124,6 +143,82 @@
     strokeOpacityOut.textContent = strokeOpacity.value + '%';
   });
 
-  // ---- boot ----
-  requestRender();
+  // ---- gradiente ----
+  const gradientToggle = document.getElementById('gradientToggle');
+  const gradientStop0 = document.getElementById('gradientStop0');
+  const gradientStop1 = document.getElementById('gradientStop1');
+  const soloColorField = document.getElementById('soloColorField');
+  const gradientFields = document.getElementById('gradientFields');
+
+  gradientToggle.addEventListener('change', () => {
+    AppState.style.gradient.enabled = gradientToggle.checked;
+    soloColorField.style.display = gradientToggle.checked ? 'none' : 'flex';
+    gradientFields.style.display = gradientToggle.checked ? 'flex' : 'none';
+  });
+  gradientStop0.addEventListener('input', () => {
+    AppState.style.gradient.stops[0].color = gradientStop0.value;
+  });
+  gradientStop1.addEventListener('input', () => {
+    AppState.style.gradient.stops[1].color = gradientStop1.value;
+  });
+
+  // ---- taper ----
+  const taperToggle = document.getElementById('taperToggle');
+  const taperStart = document.getElementById('taperStart');
+  const taperEnd = document.getElementById('taperEnd');
+  const taperFields = document.getElementById('taperFields');
+  const widthField = document.getElementById('widthField');
+
+  taperToggle.addEventListener('change', () => {
+    AppState.style.taper.enabled = taperToggle.checked;
+    taperFields.style.display = taperToggle.checked ? 'flex' : 'none';
+    widthField.style.display = taperToggle.checked ? 'none' : 'flex';
+  });
+  taperStart.addEventListener('input', () => {
+    AppState.style.taper.startWidth = parseInt(taperStart.value, 10);
+  });
+  taperEnd.addEventListener('input', () => {
+    AppState.style.taper.endWidth = parseInt(taperEnd.value, 10);
+  });
+
+  // ---- glow ----
+  const glowToggle = document.getElementById('glowToggle');
+  const glowBlur = document.getElementById('glowBlur');
+  const glowFields = document.getElementById('glowFields');
+
+  glowToggle.addEventListener('change', () => {
+    AppState.style.glow.enabled = glowToggle.checked;
+    glowFields.style.display = glowToggle.checked ? 'flex' : 'none';
+  });
+  glowBlur.addEventListener('input', () => {
+    AppState.style.glow.blur = parseInt(glowBlur.value, 10);
+  });
+
+  // ---- dash animado ----
+  const dashToggle = document.getElementById('dashToggle');
+  const dashLen = document.getElementById('dashLen');
+  const dashGap = document.getElementById('dashGap');
+  const dashSpeed = document.getElementById('dashSpeed');
+  const dashFields = document.getElementById('dashFields');
+
+  dashToggle.addEventListener('change', () => {
+    AppState.style.dash.enabled = dashToggle.checked;
+    dashFields.style.display = dashToggle.checked ? 'flex' : 'none';
+  });
+  dashLen.addEventListener('input', () => { AppState.style.dash.len = parseInt(dashLen.value, 10); });
+  dashGap.addEventListener('input', () => { AppState.style.dash.gap = parseInt(dashGap.value, 10); });
+  dashSpeed.addEventListener('input', () => { AppState.style.dash.speed = parseInt(dashSpeed.value, 10); });
+
+  // ---- pulso de opacidade ----
+  const pulseToggle = document.getElementById('pulseToggle');
+  const pulseSpeed = document.getElementById('pulseSpeed');
+  const pulseFields = document.getElementById('pulseFields');
+
+  pulseToggle.addEventListener('change', () => {
+    AppState.style.pulse.enabled = pulseToggle.checked;
+    pulseFields.style.display = pulseToggle.checked ? 'flex' : 'none';
+  });
+  pulseSpeed.addEventListener('input', () => {
+    AppState.style.pulse.speed = parseInt(pulseSpeed.value, 10) / 10;
+  });
 })();

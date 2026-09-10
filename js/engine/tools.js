@@ -16,7 +16,7 @@ const Tools = {
           tool: 'pen',
           points: [{x: pt.x, y: pt.y}],
           closed: false,
-          style: {...AppState.style}
+          style: AppState.cloneStyle()
         };
         this._dragStart = null;
         return;
@@ -83,7 +83,7 @@ const Tools = {
         tool: 'freehand',
         points: [{x: pt.x, y: pt.y}],
         closed: false,
-        style: {...AppState.style}
+        style: AppState.cloneStyle()
       };
     },
 
@@ -121,7 +121,7 @@ const Tools = {
         id: AppState.newId(),
         tool: 'ellipse',
         box: {x: pt.x, y: pt.y, w: 0, h: 0},
-        style: {...AppState.style}
+        style: AppState.cloneStyle()
       };
     },
 
@@ -159,7 +159,7 @@ const Tools = {
         id: AppState.newId(),
         tool: 'rect',
         box: {x: pt.x, y: pt.y, w: 0, h: 0},
-        style: {...AppState.style}
+        style: AppState.cloneStyle()
       };
     },
 

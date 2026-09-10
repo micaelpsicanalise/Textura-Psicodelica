@@ -20,10 +20,48 @@ const AppState = {
 
   currentTool: 'pen',
 
+  // Estilo "corrente" -- usado quando um path novo e criado. Cada path
+  // guarda seu proprio snapshot (ver cloneStyle) entao mudar isso aqui
+  // depois nao afeta traços ja desenhados -- isso so vem com uma
+  // ferramenta de selecao (roadmap).
   style: {
     color: '#ff3d81',
     width: 8,
     opacity: 1,
+    gradient: {
+      enabled: false,
+      stops: [
+        {pos: 0, color: '#ff3d81'},
+        {pos: 1, color: '#3d6bff'}
+      ]
+    },
+    glow: {
+      enabled: false,
+      blur: 20,
+      color: null // null = usa a cor/gradiente do proprio traço
+    },
+    taper: {
+      enabled: false,
+      startWidth: 2,
+      endWidth: 28
+    },
+    dash: {
+      enabled: false,
+      len: 18,
+      gap: 14,
+      speed: 60 // px/s de deslocamento do dash
+    },
+    pulse: {
+      enabled: false,
+      speed: 0.6 // ciclos/s
+    }
+  },
+
+  // Copia profunda do estilo atual -- necessario porque style tem objetos
+  // aninhados (gradient/glow/taper/dash/pulse); um spread raso deixaria
+  // todos os paths compartilhando a MESMA referencia desses objetos.
+  cloneStyle(){
+    return JSON.parse(JSON.stringify(this.style));
   },
 
   history: [],
