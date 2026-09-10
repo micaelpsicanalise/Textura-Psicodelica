@@ -116,6 +116,20 @@
     requestRender();
   });
 
+  // Correcao de UX: marcar um checkbox de efeito no painel so afeta o
+  // PROXIMO traço (cada path guarda seu style no momento em que foi
+  // criado). Esse botao e o atalho manual pra reaplicar o estilo atual
+  // do painel a tudo que ja existe -- ate a ferramenta de selecao por
+  // objeto entrar (roadmap).
+  document.getElementById('reapplyBtn').addEventListener('click', () => {
+    if(AppState.paths.length === 0) return;
+    AppState.pushHistory();
+    for(const path of AppState.paths){
+      path.style = AppState.cloneStyle();
+    }
+    requestRender();
+  });
+
   clearBtn.addEventListener('click', () => {
     if(confirm('Limpar todo o desenho?')){
       AppState.clear();
