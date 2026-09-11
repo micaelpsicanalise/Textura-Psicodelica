@@ -105,6 +105,42 @@ está pronto pra virar "por objeto" assim que existir uma ferramenta de
 seleção. Export PNG congela em t=0 (determinístico); export animado é
 item de roadmap (sequência PNG / WebM).
 
+## Cena 3D (v0.1)
+
+Modo separado, alternável pela aba "Cena 3D" na topbar. Usa a **mesma
+fonte de verdade** do editor 2D (`Renderer.renderCleanTile`) atualizada
+ao vivo a cada frame — não existe duplicação de lógica de desenho entre
+2D e 3D.
+
+- **Túnel** — um `CylinderGeometry` aberto nas pontas, câmera no centro,
+  material `BackSide` (pra ver a face interna) com a textura em
+  `RepeatWrapping`.
+- **Passeio pelo túnel** — em vez de mover a câmera de verdade, o
+  `offset.y` da textura escorrega com o tempo (matematicamente
+  equivalente, e mais simples que gerenciar um túnel infinito). Usa a
+  mesma ideia de "ciclos travados no `loopDuration`" do snake, então o
+  passeio fecha exatamente junto com os outros efeitos animados.
+- **Espelhamento caleidoscópico** — **não é geometria física duplicada**.
+  É um passe de pós-processamento: a cena normal é renderizada pra um
+  `WebGLRenderTarget`, depois um shader (`js/three3d/scene3d.js`)
+  transforma as coordenadas UV pra espaço polar, aplica `mod` pelo
+  ângulo de N-avos de volta e espelha dentro de cada fatia. É a técnica
+  clássica de kaleidoscope shader usada em visuais de VJ — dá o mesmo
+  efeito visual de simetria com muito menos geometria.
+
+Requer Three.js (`r128`, via CDN — `cdnjs.cloudflare.com`, só carrega
+quando a página abre com internet).
+
+### Roadmap 3D
+
+- Formas flutuantes na cena (o tubo/braid torcido do vídeo de
+  referência) — reaproveitando a mesma textura como material.
+- Export de vídeo da cena 3D (WebM via `canvas.captureStream()`, mesma
+  técnica planejada pro export 2D).
+- Geometria de túnel não-cilíndrica (torcida/orgânica em vez de reta).
+- Sincronizar velocidade do túnel com o snake/dash automaticamente
+  (hoje são controles independentes que só compartilham o `loopDuration`).
+
 ## Roadmap (próximos commits, em ordem de dependência)
 
 1. **Ferramenta de seleção + estilo por path** — clicar num traço

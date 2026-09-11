@@ -34,9 +34,19 @@
 
   const clockStart = performance.now();
 
+  let currentView = '2d';
+  let scene3dInitialized = false;
+
   function render(timeSec){
     Renderer.renderEditView(editCanvas, AppState.paths, AppState.tileSize, AppState.draft, MARGIN, timeSec);
     Renderer.renderPreview(previewCanvas, AppState.paths, AppState.tileSize, AppState.draft, 3, timeSec);
+
+    if(currentView === '3d' && scene3dInitialized){
+      // mesma fonte de verdade do preview 2D -- garante que o tunel
+      // nunca mostre nada que o editor 2D nao mostraria tambem.
+      const cleanTile = Renderer.renderCleanTile(AppState.paths, AppState.tileSize, AppState.draft, timeSec);
+      Scene3D.updateTextureSource(cleanTile);
+    }
   }
 
   // loop continuo: necessario pros efeitos animados (dash a fluir, pulso
@@ -304,5 +314,64 @@
   });
   globalHueSpeed.addEventListener('input', () => {
     AppState.globalHue.speed = parseInt(globalHueSpeed.value, 10) / 100;
+  });
+
+  // ---- troca entre view 2D e view 3D ----
+  const view2D = document.getElementById('view2D');
+  const view3D = document.getElementById('view3D');
+  const toolsPanel = document.getElementById('toolsPanel');
+  const stylePanel2D = document.getElementById('stylePanel2D');
+  const stylePanel3D = document.getElementById('stylePanel3D');
+  const scene3dCanvas = document.getElementById('scene3dCanvas');
+
+  document.querySelectorAll('.view-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+
+      const is3d = currentView === '3d';
+      view2D.style.display = is3d ? 'none' : 'flex';
+      view3D.style.display = is3d ? 'flex' : 'none';
+      toolsPanel.style.display = is3d ? 'none' : 'flex';
+      stylePanel2D.style.display = is3d ? 'none' : 'block';
+      stylePanel3D.style.display = is3d ? 'block' : 'none';
+
+      if(is3d){
+        if(!scene3dInitialized){
+          Scene3D.init(scene3dCanvas);
+          scene3dInitialized = true;
+        }
+        Scene3D.resize();
+        Scene3D.start();
+      } else {
+        Scene3D.stop();
+      }
+    });
+  });
+
+  window.addEventListener('resize', () => {
+    if(scene3dInitialized && currentView === '3d') Scene3D.resize();
+  });
+
+  // ---- controles da cena 3D ----
+  document.getElementById('tunnelRadius').addEventListener('input', (e) => {
+    Scene3D.settings.radius = parseInt(e.target.value, 10) / 10;
+    if(scene3dInitialized) Scene3D.applySettings();
+  });
+  document.getElementById('tunnelRepeatX').addEventListener('input', (e) => {
+    Scene3D.settings.repeatX = parseInt(e.target.value, 10);
+    if(scene3dInitialized) Scene3D.applySettings();
+  });
+  document.getElementById('tunnelRepeatY').addEventListener('input', (e) => {
+    Scene3D.settings.repeatY = parseInt(e.target.value, 10);
+    if(scene3dInitialized) Scene3D.applySettings();
+  });
+  document.getElementById('tunnelSpeedCycles').addEventListener('change', (e) => {
+    Scene3D.settings.speedCycles = parseInt(e.target.value, 10);
+  });
+  document.getElementById('kaleidoSegments').addEventListener('change', (e) => {
+    Scene3D.settings.segments = parseInt(e.target.value, 10);
+    if(scene3dInitialized) Scene3D.applySettings();
   });
 })();

@@ -62,6 +62,30 @@ html,body{
   padding:4px 6px;
 }
 
+.view-tabs{
+  display:flex;
+  gap:4px;
+  margin-left:20px;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:3px;
+}
+.view-tab-btn{
+  background:transparent;
+  border:none;
+  color:var(--text-1);
+  padding:6px 14px;
+  border-radius:5px;
+  font-size:12.5px;
+  cursor:pointer;
+}
+.view-tab-btn:hover{color:var(--text-0);}
+.view-tab-btn.active{
+  background:var(--accent-dim);
+  color:#ffcfe0;
+}
+
 .spacer{flex:1;}
 
 .btn{
@@ -155,6 +179,18 @@ html,body{
 #editCanvas{
   display:block;
   cursor:crosshair;
+}
+
+.canvas-wrap-3d{
+  width:min(80vw, 760px);
+  height:min(60vh, 560px);
+  background:#000;
+}
+
+#scene3dCanvas{
+  display:block;
+  width:100%;
+  height:100%;
 }
 
 .hint{
