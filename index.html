@@ -20,6 +20,10 @@
         <option value="1024">1024</option>
       </select>
     </div>
+    <div class="tile-size-control" title="Duração do loop -- efeitos com ciclos travados fecham exatamente nesse tempo">
+      <label for="loopDuration">Loop (s)</label>
+      <input type="number" id="loopDuration" min="0.5" max="30" step="0.5" value="4" style="width:56px;">
+    </div>
     <div class="spacer"></div>
     <button id="undoBtn" class="btn ghost" title="Ctrl+Z">Desfazer</button>
     <button id="reapplyBtn" class="btn ghost" title="Aplica o estilo atual do painel a TODOS os traços já desenhados">Reaplicar estilo</button>
@@ -123,6 +127,50 @@
         <label class="field"><span>Velocidade</span><input type="range" id="pulseSpeed" min="1" max="30" value="6"></label>
       </div>
 
+      <label class="field-toggle">
+        <input type="checkbox" id="colorShiftToggle">
+        <span>Cor mudando (shift)</span>
+      </label>
+      <div class="sub-fields" id="colorShiftFields" style="display:none;">
+        <label class="field"><span>Velocidade</span><input type="range" id="colorShiftSpeed" min="1" max="50" value="15"></label>
+      </div>
+
+      <label class="field-toggle">
+        <input type="checkbox" id="snakeToggle">
+        <span>Traço viajando (snake)</span>
+      </label>
+      <div class="sub-fields" id="snakeFields" style="display:none;">
+        <p class="field-note">Substitui taper e dash nesse traço enquanto ligado — é um segmento curto se movendo ao redor da forma, não o traço inteiro.</p>
+        <label class="field"><span>Compr.</span><input type="range" id="snakeLength" min="2" max="60" value="18"></label>
+        <label class="field"><span>Início</span><input type="range" id="snakeStart" min="0" max="60" value="2"></label>
+        <label class="field"><span>Fim</span><input type="range" id="snakeEnd" min="0" max="60" value="26"></label>
+        <label class="field"><span>Posição</span><input type="range" id="snakeStartPos" min="0" max="100" value="0"></label>
+        <label class="field">
+          <span>Ciclos</span>
+          <select id="snakeCycles">
+            <option value="off">Livre</option>
+            <option value="1">1 / loop</option>
+            <option value="2">2 / loop</option>
+            <option value="3">3 / loop</option>
+            <option value="4">4 / loop</option>
+          </select>
+        </label>
+        <label class="field" id="snakeFreeSpeedField"><span>Velocidade</span><input type="range" id="snakeSpeed" min="-100" max="100" value="25"></label>
+        <label class="field-toggle" style="margin:0;"><input type="checkbox" id="snakeReverse"><span>Reverse (inverte sentido)</span></label>
+      </div>
+
+      <hr>
+
+      <h3>Global</h3>
+      <label class="field-toggle">
+        <input type="checkbox" id="globalHueToggle">
+        <span>Matiz global girando</span>
+      </label>
+      <div class="sub-fields" id="globalHueFields" style="display:none;">
+        <p class="field-note">Gira a cor de TODO o tile já composto (independente da cor de cada traço).</p>
+        <label class="field"><span>Velocidade</span><input type="range" id="globalHueSpeed" min="1" max="50" value="10"></label>
+      </div>
+
       <hr>
 
       <h3>Preview (padrão repetido)</h3>
@@ -140,6 +188,7 @@
 </div>
 
 <script src="js/engine/state.js"></script>
+<script src="js/engine/color.js"></script>
 <script src="js/engine/geometry.js"></script>
 <script src="js/engine/render.js"></script>
 <script src="js/engine/tools.js"></script>

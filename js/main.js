@@ -111,6 +111,11 @@
     requestRender();
   });
 
+  document.getElementById('loopDuration').addEventListener('input', (e) => {
+    const v = parseFloat(e.target.value);
+    if(v > 0) AppState.loopDuration = v;
+  });
+
   undoBtn.addEventListener('click', () => {
     AppState.undo();
     requestRender();
@@ -234,5 +239,70 @@
   });
   pulseSpeed.addEventListener('input', () => {
     AppState.style.pulse.speed = parseInt(pulseSpeed.value, 10) / 10;
+  });
+
+  // ---- shift de cor ----
+  const colorShiftToggle = document.getElementById('colorShiftToggle');
+  const colorShiftSpeed = document.getElementById('colorShiftSpeed');
+  const colorShiftFields = document.getElementById('colorShiftFields');
+
+  colorShiftToggle.addEventListener('change', () => {
+    AppState.style.colorShift.enabled = colorShiftToggle.checked;
+    colorShiftFields.style.display = colorShiftToggle.checked ? 'flex' : 'none';
+  });
+  colorShiftSpeed.addEventListener('input', () => {
+    AppState.style.colorShift.speed = parseInt(colorShiftSpeed.value, 10) / 100;
+  });
+
+  // ---- snake (traco viajando ao redor da forma) ----
+  const snakeToggle = document.getElementById('snakeToggle');
+  const snakeLength = document.getElementById('snakeLength');
+  const snakeStart = document.getElementById('snakeStart');
+  const snakeEnd = document.getElementById('snakeEnd');
+  const snakeStartPos = document.getElementById('snakeStartPos');
+  const snakeCycles = document.getElementById('snakeCycles');
+  const snakeSpeed = document.getElementById('snakeSpeed');
+  const snakeReverse = document.getElementById('snakeReverse');
+  const snakeFields = document.getElementById('snakeFields');
+  const snakeFreeSpeedField = document.getElementById('snakeFreeSpeedField');
+
+  snakeToggle.addEventListener('change', () => {
+    AppState.style.snake.enabled = snakeToggle.checked;
+    snakeFields.style.display = snakeToggle.checked ? 'flex' : 'none';
+  });
+  snakeLength.addEventListener('input', () => {
+    AppState.style.snake.lengthFrac = parseInt(snakeLength.value, 10) / 100;
+  });
+  snakeStart.addEventListener('input', () => {
+    AppState.style.snake.widthStart = parseInt(snakeStart.value, 10);
+  });
+  snakeEnd.addEventListener('input', () => {
+    AppState.style.snake.widthEnd = parseInt(snakeEnd.value, 10);
+  });
+  snakeStartPos.addEventListener('input', () => {
+    AppState.style.snake.startPosFrac = parseInt(snakeStartPos.value, 10) / 100;
+  });
+  snakeCycles.addEventListener('change', () => {
+    AppState.style.snake.cyclesMode = snakeCycles.value;
+    snakeFreeSpeedField.style.display = snakeCycles.value === 'off' ? 'flex' : 'none';
+  });
+  snakeSpeed.addEventListener('input', () => {
+    AppState.style.snake.freeSpeed = parseInt(snakeSpeed.value, 10) / 100;
+  });
+  snakeReverse.addEventListener('change', () => {
+    AppState.style.snake.reverse = snakeReverse.checked;
+  });
+
+  // ---- matiz global ----
+  const globalHueToggle = document.getElementById('globalHueToggle');
+  const globalHueSpeed = document.getElementById('globalHueSpeed');
+  const globalHueFields = document.getElementById('globalHueFields');
+
+  globalHueToggle.addEventListener('change', () => {
+    AppState.globalHue.enabled = globalHueToggle.checked;
+    globalHueFields.style.display = globalHueToggle.checked ? 'flex' : 'none';
+  });
+  globalHueSpeed.addEventListener('input', () => {
+    AppState.globalHue.speed = parseInt(globalHueSpeed.value, 10) / 100;
   });
 })();

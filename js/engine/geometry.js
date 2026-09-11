@@ -108,12 +108,13 @@ const Geometry = {
     return out;
   },
 
-  // Poligono preenchido com largura variavel ao longo do comprimento do
-  // path -- e assim que se faz "taper" no Canvas, ja que stroke nativo
-  // nao suporta largura variavel. Interpola por fracao do comprimento de
-  // arco (nao por indice de ponto), pra ficar proporcional visualmente.
-  taperedPolygon(path, widthStart, widthEnd, curveSegments = 24){
-    const pts = this.flatten(path, curveSegments);
+  // Poligono preenchido com largura variavel ao longo do comprimento de
+  // uma lista de pontos ja amostrada -- e assim que se faz "taper" no
+  // Canvas, ja que stroke nativo nao suporta largura variavel. Interpola
+  // por fracao do comprimento de arco (nao por indice de ponto), pra
+  // ficar proporcional visualmente. Compartilhado por taperedPolygon
+  // (path inteiro) e pelo snake (so um pedaco do path).
+  widthPolygonFromPoints(pts, widthStart, widthEnd){
     if(pts.length < 2) return [];
 
     const lens = [0];
@@ -137,5 +138,50 @@ const Geometry = {
       right.push({x: pts[i].x - nx*halfW, y: pts[i].y - ny*halfW});
     }
     return left.concat(right.reverse());
+  },
+
+  taperedPolygon(path, widthStart, widthEnd, curveSegments = 24){
+    return this.widthPolygonFromPoints(this.flatten(path, curveSegments), widthStart, widthEnd);
+  },
+
+  // Tabela de comprimento de arco acumulado pro path inteiro -- base pro
+  // "snake" (segmento que viaja ao redor da forma em loop).
+  arcLengthTable(path, curveSegments = 24){
+    const pts = this.flatten(path, curveSegments);
+    const lens = [0];
+    for(let i = 1; i < pts.length; i++){
+      lens.push(lens[i-1] + this.dist(pts[i-1], pts[i]));
+    }
+    return {pts, lens, total: lens[lens.length - 1] || 1};
+  },
+
+  // Pontos do path cuja posicao (fracao 0..1 do comprimento total) cai
+  // entre tFrom e tTo (tFrom <= tTo, sem wrap -- wrap e responsabilidade
+  // de quem chama, ver snakeSegment).
+  sliceByFraction(table, tFrom, tTo){
+    const {pts, lens, total} = table;
+    const from = tFrom * total, to = tTo * total;
+    const out = [];
+    for(let i = 0; i < pts.length; i++){
+      if(lens[i] >= from && lens[i] <= to) out.push(pts[i]);
+    }
+    return out;
+  },
+
+  // O segmento que "viaja ao redor da forma": uma janela de comprimento
+  // lenFrac (fracao do perimetro total) cuja ponta da frente esta em
+  // headFrac (0..1, ciclico). Se a janela cruza o ponto de origem do
+  // path (headFrac - lenFrac < 0), ela e montada em duas partes -- o
+  // final do path + o comeco -- concatenadas, pra continuar continua.
+  snakeSegment(path, headFrac, lenFrac, curveSegments = 24){
+    const table = this.arcLengthTable(path, curveSegments);
+    const tailFrac = headFrac - lenFrac;
+    if(tailFrac >= 0){
+      return this.sliceByFraction(table, tailFrac, headFrac);
+    }
+    const wrapTail = 1 + tailFrac; // ex: tailFrac=-0.1 -> comeca em 0.9
+    const part1 = this.sliceByFraction(table, wrapTail, 1);
+    const part2 = this.sliceByFraction(table, 0, headFrac);
+    return part1.concat(part2);
   }
 };

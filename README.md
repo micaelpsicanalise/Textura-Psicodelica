@@ -63,7 +63,7 @@ js/engine/export.js      — export PNG
 - Wrap seamless completo (o difícil)
 - Preview 3x3 do padrão repetido, sincronizado em tempo real
 - Undo (histórico de snapshots), export PNG (256/512/1024)
-- **Efeitos** (`js/engine/render.js` + `js/engine/geometry.js`):
+- **Efeitos** (`js/engine/render.js` + `js/engine/geometry.js` + `js/engine/color.js`):
   - **Gradiente** — linear, 2 paradas de cor, direção = do primeiro ao
     último ponto amostrado da forma (`Geometry.flatten`).
   - **Taper** (afinamento nas pontas) — Canvas não tem stroke de largura
@@ -77,6 +77,26 @@ js/engine/export.js      — export PNG
     inverte o sentido).
   - **Pulso de opacidade** — oscilação senoidal em função do tempo,
     velocidade em ciclos/s.
+  - **Snake** (traço viajando ao redor da forma) — equivalente ao "Travelling
+    stroke" do produto original: um segmento curto e afinado (não o path
+    inteiro) que percorre o perímetro em loop, com **posição inicial %**,
+    **reverse** (a ponta grossa sempre lidera o movimento, a cauda fina
+    sempre arrasta atrás — isso é resolvido invertendo start/end do
+    polígono, não o sentido do cálculo de posição) e **ciclos travados no
+    loop** (`Off` = velocidade livre para preview; `N` = exatamente N
+    voltas dentro de `AppState.loopDuration`, o que garante fechamento
+    perfeito quando isso virar export de sequência animada). Implementado
+    com `Geometry.arcLengthTable` + `Geometry.snakeSegment` (extrai a
+    janela móvel do path, com wrap quando a cabeça cruza o ponto de
+    origem) e reaproveita `widthPolygonFromPoints` (mesma base do taper).
+    **Substitui** taper e dash normais nesse path enquanto ligado.
+  - **Shift de cor** (por traço) — rotação contínua de matiz (HSL) em
+    função do tempo (`ColorUtil.shiftHue`), aplicado tanto a cor sólida
+    quanto a cada parada do gradiente.
+  - **Matiz global** — equivalente ao "Global hue" do original: gira a
+    cor de **todo o tile já composto**, via `ctx.filter = hue-rotate(...)`
+    aplicado no canvas final (`Renderer.applyGlobalHueFilter`), diferente
+    do shift por-traço acima.
 
 Os efeitos são hoje **globais** (aplicam ao próximo traço desenhado, não
 retroativos aos já existentes) — cada path guarda seu próprio snapshot de
@@ -89,23 +109,34 @@ item de roadmap (sequência PNG / WebM).
 
 1. **Ferramenta de seleção + estilo por path** — clicar num traço
    existente e reabrir seu estilo no painel (hoje só dá pra definir o
-   estilo do *próximo* traço).
-2. **Gradiente com N paradas (até 16)** — o motor já suporta (`CanvasGradient`
-   aceita quantos stops quiser), falta só a UI de lista dinâmica em vez
-   de 2 cores fixas.
-3. **Camadas** — agrupar paths, reordenar, visibilidade.
-4. **Export de sequência PNG + WebM** — sequência é rodar o render frame
-   a frame fora de tempo real e empacotar com JSZip; WebM é
-   `canvas.captureStream()` + `MediaRecorder` (mesma limitação de fundo
-   opaco do original, a menos que se troque por ffmpeg.wasm).
-5. **Tracing de imagem raster → path editável** — algoritmo tipo potrace
+   estilo do *próximo* traço, com o botão "Reaplicar estilo" como
+   atalho de força-bruta pra tudo).
+2. **Taper com zona + profile** — o original tem `Start length%` /
+   `End length%` (o taper pode valer só numa fração do comprimento, não
+   o traço inteiro) e um `Profile` (expoente de easing da interpolação,
+   1 = linear). Hoje meu taper é sempre linear e cobre 100% do traço.
+3. **Dash taper** — cada segmento do dash animado também pode ter seu
+   próprio afinamento nas pontas, independente do taper do traço todo.
+4. **Gradiente com N paradas (até 16)** — o motor já suporta
+   (`CanvasGradient` aceita quantos stops quiser), falta só a UI de
+   lista dinâmica em vez de 2 cores fixas.
+5. **Grid snap ao desenhar** — "Snap to grid" com espaçamento configurável,
+   presente no produto original, ainda não implementado aqui.
+6. **Camadas** — agrupar paths, reordenar, visibilidade, duplicar.
+7. **Export de sequência PNG + WebM** — sequência é rodar o render
+   frame a frame fora de tempo real (já dá pra fazer isso corretamente
+   agora que os efeitos com ciclos travados fecham no `loopDuration`) e
+   empacotar com JSZip; WebM é `canvas.captureStream()` + `MediaRecorder`
+   (mesma limitação de fundo opaco do original, a menos que se troque
+   por ffmpeg.wasm).
+8. **Tracing de imagem raster → path editável** — algoritmo tipo potrace
    (diferente do Canny que a gente usou no preview de tatuagem — ali era
    detecção de borda, aqui precisa ser fill de região + contorno
    fechado). Dá pra usar lib pronta (`potrace` / `ImageTracer.js`).
-6. **Salvar/carregar projeto (`.tsproj` equivalente)** — serializar
+9. **Salvar/carregar projeto (`.tsproj` equivalente)** — serializar
    `AppState.paths` + config em JSON. Trivial, o modelo já é
    serializável hoje.
-7. **Empacotamento desktop** — Electron por cima do mesmo HTML/JS/CSS.
+10. **Empacotamento desktop** — Electron por cima do mesmo HTML/JS/CSS.
 
 ## Limitação conhecida do taper
 

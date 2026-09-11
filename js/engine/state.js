@@ -54,7 +54,34 @@ const AppState = {
     pulse: {
       enabled: false,
       speed: 0.6 // ciclos/s
+    },
+    snake: {
+      enabled: false,
+      lengthFrac: 0.18,     // fracao do perimetro que o segmento movel ocupa
+      startPosFrac: 0,      // posicao inicial (0..1) ao longo do path
+      reverse: false,       // inverte o sentido de viagem (cauda sempre arrasta atras)
+      cyclesMode: 'off',    // 'off' = velocidade livre | '1'/'2'/'3'/'4' = N voltas travadas no loop
+      freeSpeed: 0.25,      // voltas/s, usado so quando cyclesMode === 'off'
+      widthStart: 2,        // espessura na cauda
+      widthEnd: 26          // espessura na cabeca (frente do movimento)
+    },
+    colorShift: {
+      enabled: false,
+      speed: 0.15 // voltas de matiz (360°) por segundo
     }
+  },
+
+  // Duracao do loop em segundos -- os efeitos com "ciclos travados"
+  // (ex: travelling stroke com N voltas) usam isso pra garantir que a
+  // animacao feche exatamente sem salto, o que importa quando isso virar
+  // export de sequencia/WebM (roadmap).
+  loopDuration: 4,
+
+  // Matiz global -- gira a cor de TODO o tile já composto (diferente do
+  // shift de cor por-traço). Aplicado como filtro CSS no canvas final.
+  globalHue: {
+    enabled: false,
+    speed: 0.1 // voltas de matiz por segundo
   },
 
   // Copia profunda do estilo atual -- necessario porque style tem objetos
